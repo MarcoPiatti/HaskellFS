@@ -13,8 +13,8 @@ data File = File
     } deriving (Show, Eq)
 
 -- Informacion sobre una carpeta por encima de una carpeta actual
--- Tiene todos los datos necesarios para reconstruir la carpeta
--- padre a partir de esto y la carpeta actual
+-- Tiene todos los datos necesarios para reconstruir la carpeta padre
+-- a partir de este data y la carpeta actual
 data Visited = Visited 
     { visitedName :: String
     , visitedFiles :: [File]
@@ -25,14 +25,15 @@ data Visited = Visited
 -- Una carpeta actual y la lista de carpetas visitadas previamente
 type Path = (Dir, [Visited])
 
--- Un filesystem es la carpeta raiz, y el path actual que tiene la sesion
+-- Un filesystem es la carpeta raiz, y el path del current (working) directory que tiene la sesion
+-- ya que un path mas adelante puede ser absoluto o ser relativo al path actual
 data Filesystem = Filesystem 
     { root :: Dir
     , currentPath :: Path
     } deriving (Show, Eq)
 
+-- Quizas separar en modulos para dir y file por un lado, otro para path, y otro para fs
 
--- Todos estos metodos seran reimplementados con el sistema de paths luego
 updateDir :: (Dir -> Dir) -> Dir -> Dir -> Dir
 updateDir updater targetDir root
     | root == targetDir = updater root
