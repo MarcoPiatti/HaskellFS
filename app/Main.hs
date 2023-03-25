@@ -1,6 +1,8 @@
 module Main where
 
-import Filesystem
+import Directory
+import Path
+import Command
 
 main :: IO ()
 main = putStrLn "Hello, Haskell!"

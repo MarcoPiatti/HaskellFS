@@ -30,8 +30,20 @@ dirFrom dir visited = Dir (visitedName visited) (visitedFiles visited) (visitedL
 initPath :: Dir -> Path
 initPath dir = (dir, [])
 
+recreateRoot :: Path -> Dir
+recreateRoot (dir, visited) = foldl dirFrom dir visited
+
 visitSubdir :: Dir -> Path -> Path
 visitSubdir subdir (current, visited) = (subdir, visitedFrom current subdir : visited)
 
 visitParent :: Path -> Path
 visitParent (current, parentVisit:visited) = (dirFrom current parentVisit, visited)
+
+visitRoot :: Path -> Path
+visitRoot path = (recreateRoot path, [])
+
+updatePathDir :: (Dir -> Dir) -> Path -> Path
+updatePathDir updater (dir, visited) = (updater dir, visited)
+
+visitSubdirByName :: String -> Path -> Maybe Path
+visitSubdirByName name path = flip visitSubdir path <$> resolveSubdir name (fst path)
