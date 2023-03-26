@@ -1,7 +1,7 @@
 module Main where
 
-import Directory
-import Path
+import DirTree
+import Cursor
 import Command
 
 main :: IO ()
