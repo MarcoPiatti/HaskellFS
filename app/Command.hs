@@ -1,3 +1,5 @@
+{-# LANGUAGE TupleSections #-}
+
 module Command where
 
 import FSError
@@ -22,3 +24,31 @@ luego a partir de esta lista de direcciones es aplicarlas en secuencia sobre el 
 
 cd es el unico comando que no hace modificaciones sobre el fs, solo sobre el cursor en si.
 -}
+
+data Command = Cd [Direction] | Ls | Touch [Direction] | Mkdir [Direction] deriving (Show, Eq)
+
+cd :: [Direction] -> Cursor -> Either FSError Cursor
+cd = traverseFs
+
+ls :: Cursor -> Either FSError [FSElem]
+ls (Dir _ children, _) = Right children
+ls (File _, _) = Left NotDirectory
+
+dropLast :: [a] -> [a]
+dropLast [] = []
+dropLast [x] = []
+dropLast (x:xs) = x : dropLast xs
+
+insertFSElem :: (String -> FSElem) -> (FSElem -> FSElem -> Either FSError FSElem) -> [Direction] -> Cursor -> Either FSError Cursor
+insertFSElem constructor policy directions = insertFSElem' policy (dropLast directions) (constructor . directionToString . last $ directions)
+
+insertFSElem' :: (FSElem -> FSElem -> Either FSError FSElem) -> [Direction] -> FSElem -> Cursor -> Either FSError Cursor
+insertFSElem' policy path newElem cursor = do
+    (dir, crumbs) <- traverseFs path cursor
+    (,crumbs) <$> policy newElem dir
+
+touch :: [Direction] -> Cursor -> Either FSError Cursor
+touch = insertFSElem File addorReplaceFSElem
+
+mkdir :: [Direction] -> Cursor -> Either FSError Cursor
+mkdir = insertFSElem emptyDir addFSElem

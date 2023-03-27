@@ -3,6 +3,7 @@ module Cursor where
 import FSError
 import DirTree
 import Data.List
+import Control.Monad
 
 -- Informacion sobre una carpeta por encima de una carpeta actual
 -- Tiene todos los datos necesarios para reconstruir la carpeta padre
@@ -16,6 +17,13 @@ data Crumb = Crumb
 -- Una carpeta actual y la lista de carpetas visitadas previamente
 type Cursor = (FSElem, [Crumb])
 
+data Direction = Here | Up | Down String | Root deriving (Show, Eq)
+
+directionToString :: Direction -> String
+directionToString Here = "."
+directionToString Up = ".."
+directionToString (Down name) = name
+
 crumb :: FSElem -> FSElem -> Crumb
 crumb (Dir name children) child = 
     let (left, elem:right) = break (== child) children
@@ -28,7 +36,7 @@ cursor :: FSElem -> Cursor
 cursor root = (root, [])
 
 rootCursor :: Cursor
-rootCursor = cursor rootDir
+rootCursor = cursor $ emptyDir ""
 
 root :: Cursor -> FSElem
 root (current, crumbs) = foldl' uncrumb current crumbs
@@ -43,3 +51,12 @@ ascend (current, crumb:visited) = (uncrumb current crumb, visited)
 
 restart :: Cursor -> Cursor
 restart cursor = (root cursor, [])
+
+moveCursor :: Direction -> Cursor -> Either FSError Cursor
+moveCursor Here cursor = Right cursor
+moveCursor Root cursor = Right . restart $ cursor
+moveCursor Up cursor = Right . ascend $ cursor
+moveCursor (Down childName) (dir, crumbs) = (findChildByName childName dir) >>= flip descendTo (dir, crumbs)
+
+traverseFs :: [Direction] -> Cursor -> Either FSError Cursor
+traverseFs = foldl (>=>) (return) . map moveCursor
