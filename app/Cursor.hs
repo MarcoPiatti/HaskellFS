@@ -20,6 +20,7 @@ type Cursor = (FSElem, [Crumb])
 data Direction = Here | Up | Down String | Root deriving (Show, Eq)
 
 directionToString :: Direction -> String
+directionToString Root = ""
 directionToString Here = "."
 directionToString Up = ".."
 directionToString (Down name) = name
@@ -42,7 +43,7 @@ root :: Cursor -> FSElem
 root (current, crumbs) = foldl' uncrumb current crumbs
 
 descendTo :: FSElem -> Cursor -> Either FSError Cursor
-descendTo (File _) _ = Left NotDirectory 
+descendTo child (File _, crumbs) = Left NotDirectory 
 descendTo child (current, crumbs) = Right (child, crumb current child : crumbs)
 
 ascend :: Cursor -> Cursor
@@ -56,7 +57,15 @@ moveCursor :: Direction -> Cursor -> Either FSError Cursor
 moveCursor Here cursor = Right cursor
 moveCursor Root cursor = Right . restart $ cursor
 moveCursor Up cursor = Right . ascend $ cursor
-moveCursor (Down childName) (dir, crumbs) = (findChildByName childName dir) >>= flip descendTo (dir, crumbs)
+moveCursor (Down childName) (dir, crumbs) = findChildByName childName dir >>= flip descendTo (dir, crumbs)
 
 traverseFs :: [Direction] -> Cursor -> Either FSError Cursor
-traverseFs = foldl (>=>) (return) . map moveCursor
+traverseFs = foldl (>=>) return . map moveCursor
+
+path :: Cursor -> [Direction]
+path (_, []) = [Root]
+path (current, c:cs) = (++ [Down $ name current]) . path . ascend $ (current, c:cs)
+
+pathstring :: Cursor -> String
+pathstring (_, []) = "/"
+pathstring cursor = intercalate "/" . map directionToString . path $ cursor

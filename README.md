@@ -4,7 +4,7 @@ debe soportar los siguientes comandos:
 cd
 ls
 mkdir
-rm
 touch
+rm
 
 veo luego si habia alguno mas

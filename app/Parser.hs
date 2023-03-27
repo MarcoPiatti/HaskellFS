@@ -79,7 +79,7 @@ childP :: Parser Direction
 childP = Down <$> filenameP
 
 pathTailElemP :: Parser Direction
-pathTailElemP = (parentP <|> cwdP <|> childP)
+pathTailElemP = parentP <|> cwdP <|> childP
 
 pathHeadP :: Parser Direction
 pathHeadP = rootP <|> pathTailElemP
@@ -102,5 +102,8 @@ touchP = Touch <$> (stringP "touch" *> wsP *> pathP)
 mkdirP :: Parser Command
 mkdirP = Mkdir <$> (stringP "mkdir" *> wsP *> pathP)
 
+rmP :: Parser Command
+rmP = Rm <$> (stringP "rm" *> wsP *> pathP)
+
 commandP :: Parser Command
-commandP = cdP <|> lsP <|> touchP
+commandP = cdP <|> lsP <|> touchP <|> mkdirP <|> rmP

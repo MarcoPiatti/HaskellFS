@@ -19,22 +19,22 @@ rename name (File _) = File name
 hasName :: String -> FSElem -> Bool
 hasName target elem = target == name elem
 
-addFSElem :: FSElem -> FSElem -> Either FSError FSElem
-addFSElem newElem (Dir dirname elems) = case filter (hasName $ name newElem) elems of
+addChild :: FSElem -> FSElem -> Either FSError FSElem
+addChild newElem (Dir dirname elems) = case filter (hasName $ name newElem) elems of
     [] -> Right $ Dir dirname (newElem : elems)
     _ -> Left AlreadyExists
-addFSElem _ (File _) = Left NotDirectory
+addChild _ (File _) = Left NotDirectory
 
-addorReplaceFSElem :: FSElem -> FSElem -> Either FSError FSElem
-addorReplaceFSElem newElem (Dir dirname elems) = case filter (hasName $ name newElem) elems of
+addOrReplaceChild :: FSElem -> FSElem -> Either FSError FSElem
+addOrReplaceChild newElem (Dir dirname elems) = case filter (hasName $ name newElem) elems of
     [] -> Right $ Dir dirname (newElem : elems)
     [elem] -> Right $ Dir dirname (newElem : delete elem elems)
     _ -> Left AlreadyExists
 
-deleteFSElem :: FSElem -> FSElem -> Either FSError FSElem
-deleteFSElem targetElem (Dir name elems) 
-    | targetElem `elem` elems = Right $ Dir name (delete targetElem elems)
-    | otherwise = Left DoesNotExist
+-- asume que el elemento ya es hijo
+-- asume que nunca se lo llama desde un archivo
+deleteChild :: FSElem -> FSElem -> FSElem
+deleteChild targetElem (Dir name elems) = Dir name (delete targetElem elems)
 
 findChildByName :: String -> FSElem -> Either FSError FSElem
 findChildByName targetName (Dir _ elems) = case filter (hasName targetName) elems of
