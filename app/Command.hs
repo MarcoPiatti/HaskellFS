@@ -71,3 +71,16 @@ deleteFSElem' (elem, crumbs) =
 
 rm :: [Direction] -> Cursor -> Either FSError Cursor
 rm = deleteFSElem
+
+mv :: [Direction] -> [Direction] -> Cursor -> Either FSError Cursor
+mv source destination cursor = do
+    elem <- takeFSElem source cursor
+    cursor' <- deleteFSElem source cursor
+    cursor'' <- traverseFs (dropLast destination) cursor'
+    mv' elem (last destination) cursor''
+
+mv' :: FSElem -> Direction -> Cursor -> Either FSError Cursor
+mv' elem (Down dirn) cursor 
+    | moveCursor (Down dirn) cursor == Left DoesNotExist = insertFSElem' addChild (path cursor) (rename dirn elem) cursor
+mv' elem d c = moveCursor d c >>= insertFSElem' addOrReplaceChild (path c) elem
+
