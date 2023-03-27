@@ -5,26 +5,17 @@ module Command where
 import FSError
 import DirTree
 import Cursor
+import Data.Either (partitionEithers)
 
-{- 
-cd: Cambia el CWD segun un path
-asumiendo un CWD /dir1/dir2
-un path puede ser absoluto como /dir1/dir2/dir3
-o relativo como ./dir3 o ../dir2b
+{-
+todavia no se bien como encarar la conversion del Data Command a la funcion que a partir
+de un cursor genera el nuevo resultado.
 
-una forma de resolver la traducción de un path a un traversal del cursor es
-interpretar cada string separada entre '/' como un comando de recorrido.
-. se resuelve a la funcion id (no cambia)
-.. se resuelve a la funcion ascend
-nombre se resuelve a la funcion descendTo, del cual el nombre debe resolverse a uno valido
+me huele que voy a tener que wrappear todo en un IO o algo para que los comandos sean homogeneos entre si.
+porque todos generan efecto en el cursor excepto ls que solo printea los contenidos.
 
-la resolución de un pathstring a la secuencia apropiada la hacemos en otro modulo.
-
-luego a partir de esta lista de direcciones es aplicarlas en secuencia sobre el cursor y retornar el resultado.
-
-cd es el unico comando que no hace modificaciones sobre el fs, solo sobre el cursor en si.
+quizas haya algun tipo de wrappeo que printea y devuelve el nuevo cursor. veremos
 -}
-
 data Command = Cd [Direction] | Ls | Touch [Direction] | Mkdir [Direction] deriving (Show, Eq)
 
 cd :: [Direction] -> Cursor -> Either FSError Cursor
