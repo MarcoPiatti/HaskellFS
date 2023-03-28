@@ -12,6 +12,14 @@ name :: FSElem -> String
 name (Dir name _) = name
 name (File name) = name
 
+isDir :: FSElem -> Bool
+isDir (Dir _ _) = True
+isDir (File _) = False
+
+prettyPrint :: FSElem -> String
+prettyPrint (Dir name _) = name ++ "/"
+prettyPrint (File name) = name
+
 rename :: String -> FSElem -> FSElem
 rename name (Dir _ elems) = Dir name elems
 rename name (File _) = File name

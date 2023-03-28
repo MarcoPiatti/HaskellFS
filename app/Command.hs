@@ -9,7 +9,9 @@ import Data.Either (partitionEithers)
 import Control.Applicative ( Alternative((<|>)) )
 import Control.Monad ( (>=>) )
 import DirTree (deleteChild)
-import Data.List (intercalate)
+import Data.List (intercalate, partition, sort)
+import Data.Bifunctor (bimap)
+import Data.Bifoldable (Bifoldable(bifoldl))
 
 {-
 todavia no se bien como encarar la conversion del Data Command a la funcion que a partir
@@ -43,7 +45,7 @@ cd' (File _, _) = Left NotDirectory
 cd' cursor = Right cursor
 
 ls :: Cursor -> Either FSError String
-ls (Dir _ children, _) = Right $ intercalate "\n" . map name $ children
+ls (Dir _ children, _) = Right $ intercalate "  " . bifoldl (flip const) (++) [] . bimap (sort . map prettyPrint) (sort . map prettyPrint) . partition isDir $ children
 ls (File _, _) = Left NotDirectory
 
 insertFSElem :: (String -> FSElem) -> (FSElem -> FSElem -> Either FSError FSElem) -> [Direction] -> Cursor -> Either FSError Cursor
