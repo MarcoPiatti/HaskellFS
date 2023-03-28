@@ -7,6 +7,7 @@ import Cursor
 import Command
 import Control.Applicative
 import Data.Char
+import Data.Functor
 
 data ParseError = ParseError deriving (Show, Eq)
 
@@ -90,8 +91,14 @@ pathTailP = many $ charP '/' *> pathTailElemP
 pathP :: Parser [Direction]
 pathP = (:) <$> pathHeadP <*> pathTailP
 
+cdparamP :: Parser Command
+cdparamP = Cd <$> (stringP "cd" *> wsP *> pathP)
+
+rootcdP :: Parser Command
+rootcdP = Cd <$> (stringP "cd" *> pure [Root])
+
 cdP :: Parser Command
-cdP = Cd <$> (stringP "cd" *> wsP *> pathP)
+cdP = cdparamP <|> rootcdP
 
 lsP :: Parser Command
 lsP = Ls <$ stringP "ls"
