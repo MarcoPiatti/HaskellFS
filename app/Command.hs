@@ -20,7 +20,15 @@ porque todos generan efecto en el cursor excepto ls que solo printea los conteni
 
 quizas haya algun tipo de wrappeo que printea y devuelve el nuevo cursor. veremos
 -}
-data Command = Cd [Direction] | Ls | Touch [Direction] | Mkdir [Direction] | Rm [Direction] deriving (Show, Eq)
+data Command 
+    = Cd [Direction] 
+    | Ls 
+    | Touch [Direction] 
+    | Mkdir [Direction] 
+    | Rm [Direction] 
+    | Mv [Direction] [Direction] 
+    | Cp [Direction] [Direction]
+    deriving (Show, Eq)
 
 dropLast :: [a] -> [a]
 dropLast [] = []
@@ -77,10 +85,19 @@ mv source destination cursor = do
     elem <- takeFSElem source cursor
     cursor' <- deleteFSElem source cursor
     cursor'' <- traverseFs (dropLast destination) cursor'
-    mv' elem (last destination) cursor''
+    cursor''' <- mv' elem (last destination) cursor''
+    traverseFs (path cursor) cursor''' <|> Right cursor'''
 
 mv' :: FSElem -> Direction -> Cursor -> Either FSError Cursor
 mv' elem (Down dirn) cursor 
     | moveCursor (Down dirn) cursor == Left DoesNotExist = insertFSElem' addChild (path cursor) (rename dirn elem) cursor
-mv' elem d c = moveCursor d c >>= insertFSElem' addOrReplaceChild (path c) elem
+mv' elem d c = do
+   (dir, crumbs) <- moveCursor d c
+   (,crumbs)  <$> addOrReplaceChild elem dir
 
+cp :: [Direction] -> [Direction] -> Cursor -> Either FSError Cursor
+cp source destination cursor = do
+    elem <- takeFSElem source cursor
+    cursor' <- traverseFs (dropLast destination) cursor
+    cursor'' <- mv' elem (last destination) cursor'
+    traverseFs (path cursor) cursor''

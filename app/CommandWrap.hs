@@ -23,3 +23,5 @@ wrapCommand Ls = wrapQuery ls
 wrapCommand (Touch p) = wrapEffect $ touch p
 wrapCommand (Mkdir p) = wrapEffect $ mkdir p
 wrapCommand (Rm p) = wrapEffect $ deleteFSElem p
+wrapCommand (Mv p1 p2) = wrapEffect $ mv p1 p2
+wrapCommand (Cp p1 p2) = wrapEffect $ cp p1 p2

@@ -105,5 +105,11 @@ mkdirP = Mkdir <$> (stringP "mkdir" *> wsP *> pathP)
 rmP :: Parser Command
 rmP = Rm <$> (stringP "rm" *> wsP *> pathP)
 
+mvP :: Parser Command
+mvP = Mv <$> (stringP "mv" *> wsP *> pathP) <*> (wsP *> pathP)
+
+cpP :: Parser Command
+cpP = Cp <$> (stringP "cp" *> wsP *> pathP) <*> (wsP *> pathP)
+
 commandP :: Parser Command
-commandP = cdP <|> lsP <|> touchP <|> mkdirP <|> rmP
+commandP = cdP <|> lsP <|> touchP <|> mkdirP <|> rmP <|> mvP <|> cpP 
