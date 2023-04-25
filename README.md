@@ -1,10 +1,5 @@
 Filesystem de juguete en haskell.
 
-debe soportar los siguientes comandos:
-cd
-ls
-mkdir
-touch
-rm
+No tiene archivos reales, es solo la estructura de directorios+filenames.
 
-veo luego si habia alguno mas
+Soporta los siguientes comandos POSIX: cd, mkdir, touch, rm, mv, cp
